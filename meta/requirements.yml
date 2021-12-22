@@ -1,10 +1,11 @@
 ---
-collections:
-  - name: containers.podman
-  - name: ansible.posix
-  - name: community.general
-
 # https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#installing-roles-and-collections-from-the-same-requirements-yml-file
 # https://github.com/ansible/ansible/issues/73347
 # https://github.com/ansible-community/ansible-lint/issues/1270
 # https://github.com/ansible/ansible/issues/73732
+roles: []
+collections:
+  - containers.podman
+  - ansible.posix
+  - community.general
+
