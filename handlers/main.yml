@@ -1,2 +1,16 @@
 ---
 # handlers file for ansible_podman_freeipa
+
+- name: enable podman-rootless-socket
+  systemd:
+    name: freeipa-rootless-podman.socket
+    enabled: yes
+    daemon_reload: yes
+  become: true
+
+- name: enable freeipa-server
+  systemd:
+    name: freeipa.service
+    enabled: yes
+    daemon_reload: yes
+  become: true

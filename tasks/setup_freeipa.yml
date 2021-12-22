@@ -1,0 +1,51 @@
+
+---
+
+- name: Ensure freeipa-rootless-podman.socket installed
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ freeipa_systemd_path }}/{{ item }}"
+    mode: 0640
+  with_items:
+  - "freeipa-rootless-podman.service"
+  - "freeipa-rootless-podman.socket"
+  notify:
+    - enable podman-rootless-socket
+  become: yes
+
+- name: Ensure freeipa systemd files are installed installed
+  template:
+    src: "{{ role_path }}/templates/freeipa-server/{{ item }}.j2"
+    dest: "{{ freeipa_systemd_path }}/{{ item }}"
+    mode: 0640
+  with_items:
+    - freeipa.service
+  notify:
+    - enable freeipa-server
+  become: yes
+
+#- name: Create freeipa network
+#  shell: podman network create "{{ freeipa_podman_network }}"
+#  become: yes
+#  ignore_errors: yes
+#  tags:
+#    - always
+
+##
+# https://github.com/containers/ansible-podman-collections/blob/master/plugins/modules/podman_pod.py
+##
+- name: Create freeipa pod
+  containers.podman.podman_pod:
+    name: "{{ freeipa_podman_pod_name }}"
+    publish:
+      - "{{ freeipa_podman_dns_bind_port }}:{{ freeipa_podman_dns_bind_port }}"
+      - "8000:{{ freeipa_podman_http_bind_port }}"
+      - "{{ freeipa_podman_kerberos_bind_port }}:{{ freeipa_podman_kerberos_bind_port }}"
+      - "{{ freeipa_podman_ntp_bind_port }}:{{ freeipa_podman_ntp_bind_port }}"
+      - "{{ freeipa_podman_ldap_bind_port }}:{{ freeipa_podman_ldap_bind_port }}"
+      - "8443:{{ freeipa_podman_https_bind_port }}"
+      - "{{ freeipa_podman_kpassword_bind_port }}:{{ freeipa_podman_kpassword_bind_port }}"
+      - "{{ freeipa_podman_ldaps_bind_port }}:{{ freeipa_podman_ldaps_bind_port }}/udp"
+  become_user: "{{ freeipa_user_username }}"
+  become: yes
+

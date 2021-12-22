@@ -1,0 +1,31 @@
+#jinja2: lstrip_blocks: "True"
+[Unit]
+Description=freeipa
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/podman stop freeipa
+ExecStartPre=-/usr/bin/podman rm freeipa
+
+ExecStart=/usr/bin/podman run --rm --name freeipa \
+			--pod={{ freeipa_podman_pod_name }} \
+			--volume {{ freeipa_data_path }}:/data:Z \
+			--volume {{ freeipa_data_path }}/www:/var/www/html:Z \
+			--volume {{ freeipa_data_path }}/logs:/var/log:Z \
+			--env-file={{ freeipa_base_path }}/env-freeipa \
+			-h {{ freepbx_domain_name }} \
+			--read-only \
+			{% for arg in freeipa_container_extra_arguments %}
+			{{ arg }} \
+			{% endfor %}
+			-t {{ freeipa_podman_image }} 
+
+ExecStop=-/usr/bin/podman stop freeipa
+ExecStop=-/usr/bin/podman rm freeipa
+User={{ freeipa_user_username }}
+Restart=always
+RestartSec=30
+SyslogIdentifier=freeipa
+
+[Install]
+WantedBy=multi-user.target
