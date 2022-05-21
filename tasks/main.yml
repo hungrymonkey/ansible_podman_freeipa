@@ -11,7 +11,7 @@
   tags:
     - setup-all
     - setup-freeipa
-    
+
 
 - name: Setup Rootless Podman
   import_tasks: "{{ role_path }}/tasks/setup_freeipa.yml"
@@ -20,5 +20,5 @@
     - setup-freeipa
 
 - name: Set Certbot script variable.
-  set_fact:
+  ansible.builtin.set_fact:
     certbot_script: /usr/bin/certbot

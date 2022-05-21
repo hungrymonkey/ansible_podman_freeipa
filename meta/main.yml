@@ -32,7 +32,7 @@ galaxy_info:
   platforms:
     - name: Debian
       versions:
-      - bullseye
+        - bullseye
   #   - 25
   # - name: SomePlatform
   #   versions:

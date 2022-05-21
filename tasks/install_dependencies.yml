@@ -3,60 +3,66 @@
 - name: Install Dependencies (Debian Family)
   block:
     - name: Update apt cache.
-      apt: update_cache=true cache_valid_time=600
+      ansible.builtin.apt: update_cache=true cache_valid_time=600
       changed_when: false
-      become: yes
+      become: true
 
-    ## TASK : Add Podman apt key FAILED! => {"changed": false, "msg": "Failed to find required executable gpg in paths: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"}
+    ## TASK : Add Podman apt key FAILED! =>
+    ## {"changed": false, "msg": "Failed to find required executable gpg in paths: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"}
     ## Affects Debian buster
     - name: Install gpupg
-      apt:
+      ansible.builtin.apt:
         name: ['gnupg']
         state: present
-      become: yes
+      become: true
 
-    #{"msg": "Failed to set permissions on the temporary files Ansible needs to create when becoming an unprivileged user (rc: 1, err: chown: changing ownership of '/var/tmp/ansible-tmp-1590851440.4776251-73765-200011268915663/': Operation not permitted\nchown: changing ownership of '/var/tmp/ansible-tmp-1590851440.4776251-73765-200011268915663/AnsiballZ_gem.py': Operation not permitted\n}). For information on working around this, see https://docs.ansible.com/ansible/become.html#becoming-an-unprivileged-user"}
-    #https://bugs.launchpad.net/ubuntu/+source/snapd/+bug/1593578
+    # {"msg": "Failed to set permissions on the temporary files Ansible needs
+    # to create when becoming an unprivileged user (rc: 1, err: chown: changing
+    # ownership of '/var/tmp/ansible-tmp-1590851440.4776251-73765-200011268915663/':
+    # Operation not permitted\nchown: changing ownership of
+    # '/var/tmp/ansible-tmp-1590851440.4776251-73765-200011268915663/AnsiballZ_gem.py':
+    # Operation not permitted\n}). For information on working around this, see https://docs.ansible.com/ansible/become.html#becoming-an-unprivileged-user"}
+    # https://bugs.launchpad.net/ubuntu/+source/snapd/+bug/1593578
     ## https://github.com/containers/libpod/blob/master/docs/tutorials/rootless_tutorial.md
     - name: Install Dependencies
-      apt:
+      ansible.builtin.apt:
         name: ['podman', 'haproxy', 'containernetworking-plugins', 'awscli', 'git', 'slirp4netns', 'dnsmasq', 'acl']
         state: present
-      become: yes
+      become: true
   when: ansible_os_family == 'Debian'
 
 - name: Install certbot snap
   block:
     - name: Ensure snapd is installed.
-      package:
+      ansible.builtin.package:
         name: snapd
         state: present
       register: snapd_install
-      become: yes
+      become: true
 
     - name: Ensure snapd is enabled.
-      systemd:
+      ansible.builtin.systemd:
         name: snapd.socket
         enabled: true
-      become: yes
+      become: true
 
     - name: Update snap after install.
-      shell: snap install core; snap refresh core
+      ansible.builtin.shell: snap install core; snap refresh core
       changed_when: true
       failed_when: false
       when: snapd_install is changed
-      become: yes
+      become: true
 
     - name: Install certbot via snap.
       community.general.snap:
         name: certbot
         classic: true
-      become: yes
+      become: true
 
     - name: Symlink certbot into place.
-      file:
+      ansible.builtin.file:
         src: /snap/bin/certbot
         dest: /usr/bin/certbot
         state: link
-      become: yes
+      become: true
   when: letsencrypt_certbot_enabled|bool

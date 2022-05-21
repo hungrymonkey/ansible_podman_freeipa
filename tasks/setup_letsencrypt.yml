@@ -1,40 +1,40 @@
 ---
 
 - name: Check if certificate already exists.
-  stat:
-    path:  "{{ freeipa_haproxy_ssl_path }}/{{ freeipa_domain_name }}/cert.pem"
+  ansible.builtin.stat:
+    path: "{{ freeipa_haproxy_ssl_path }}/{{ freeipa_domain_name }}/cert.pem"
   register: letsencrypt_cert
 
 - name: Stop services to allow certbot to generate a cert.
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: stopped
   when: not letsencrypt_cert.stat.exists
   with_items: "{{ letsencrypt_certbot_create_standalone_stop_services }}"
 
 - name: Generate new certificate if one doesn't exist.
-  command: >
-        "{{ certbot_script }}" certonly --standalone --noninteractive 
+  ansible.builtin.command: >
+        "{{ certbot_script }}" certonly --standalone --noninteractive
         --agree-tos --email "{{ letsencrypt_certbot_admin_email }}"
         --preferred-challenges http
         -d "{{ freeipa_domain_name }}"
-  when: 
+  when:
     - not letsencrypt_cert.stat.exists
     - not letsencrypt_certbot_staging|bool
 
 - name: Generate new staging certificate if one doesn't exist.
-  command: >
-      "{{ certbot_script }}" certonly --standalone --noninteractive 
+  ansible.builtin.command: >
+      "{{ certbot_script }}" certonly --standalone --noninteractive
       --agree-tos --email "{{ letsencrypt_certbot_admin_email }}"
-      --preferred-challenges http 
+      --preferred-challenges http
       -d "{{ freeipa_domain_name }}"
       --staging
-  when: 
+  when:
     - not letsencrypt_cert.stat.exists
     - letsencrypt_certbot_staging|bool
 
 - name: Start services after cert has been generated.
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: started
   when: not letsencrypt_cert.stat.exists
@@ -42,7 +42,7 @@
 
 
 - name: Ensure freeipa systemd files are installed installed
-  template:
+  ansible.builtin.template:
     src: "{{ role_path }}/templates/freeipa-letsencrypt/{{ item }}.j2"
     dest: "{{ freeipa_systemd_path }}/{{ item }}"
     mode: 0640
@@ -60,7 +60,7 @@
 ###
 
 - name: Check existence of freeipa-letsencrypt timer
-  stat:
+  ansible.builtin.stat:
     path: "{{ freeipa_systemd_path }}/freeipa-letsencrypt.timer"
   register: freeipa_letsencrypt
   when: "not letsencrypt_certbot_enabled|bool or not freeipa_haproxy_enabled|bool"
@@ -68,12 +68,12 @@
 - name: Delete freeipa-letsencrypt.timer
   block:
     - name: Stop freeipa-letsencrypt.timer timer
-      systemd:
+      ansible.builtin.systemd:
         name: freeipa-letsencrypt.timer
         state: stopped
 
     - name: Ensure freeipa-letsencrypt.timer doesn't exist
-      file:
+      ansible.builtin.file:
         path: "{{ freeipa_systemd_path }}/{{ item }}"
         state: absent
       notify:
