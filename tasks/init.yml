@@ -1,0 +1,12 @@
+- name: Create freeipa group
+  ansible.builtin.group:
+    name: "{{ freeipa_user_username }}"
+    gid: "{{ freeipa_user_gid }}"
+    state: present
+
+- name: Create freeipa user
+  ansible.builtin.user:
+    name: "{{ freeipa_user_username }}"
+    uid: "{{ freeipa_user_uid }}"
+    group: "{{ freeipa_user_gid }}"
+    state: present
