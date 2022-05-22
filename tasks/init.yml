@@ -3,6 +3,7 @@
     name: "{{ freeipa_user_username }}"
     gid: "{{ freeipa_user_gid }}"
     state: present
+  become: true
 
 - name: Create freeipa user
   ansible.builtin.user:
@@ -10,3 +11,4 @@
     uid: "{{ freeipa_user_uid }}"
     group: "{{ freeipa_user_gid }}"
     state: present
+  become: true
