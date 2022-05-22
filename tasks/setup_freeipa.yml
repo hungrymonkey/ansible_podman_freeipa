@@ -32,6 +32,7 @@
 
 ##
 # https://github.com/containers/ansible-podman-collections/blob/master/plugins/modules/podman_pod.py
+# https://github.com/ansible/ansible/issues/72264
 ##
 - name: Create freeipa pod
   containers.podman.podman_pod:
@@ -45,5 +46,6 @@
       - "8443:{{ freeipa_podman_https_bind_port }}"
       - "{{ freeipa_podman_kpassword_bind_port }}:{{ freeipa_podman_kpassword_bind_port }}"
       - "{{ freeipa_podman_ldaps_bind_port }}:{{ freeipa_podman_ldaps_bind_port }}/udp"
+  world_readable_temp: true
   become_user: "{{ freeipa_user_username }}"
   become: true
