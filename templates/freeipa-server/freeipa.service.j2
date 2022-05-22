@@ -13,7 +13,7 @@ ExecStart=/usr/bin/podman run --rm --name freeipa \
 			--volume {{ freeipa_data_path }}/www:/var/www/html:Z \
 			--volume {{ freeipa_data_path }}/logs:/var/log:Z \
 			--env-file={{ freeipa_base_path }}/env-freeipa \
-			-h {{ freepbx_domain_name }} \
+			-h {{ freeipa_domain_name }} \
 			--read-only \
 			{% for arg in freeipa_container_extra_arguments %}
 			{{ arg }} \
