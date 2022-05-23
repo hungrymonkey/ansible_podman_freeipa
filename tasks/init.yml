@@ -16,11 +16,13 @@
 
 # Enable linger to allow systemd session for non login user
 # Failed to get user: User ID 1050 is not logged in or lingering
-- name: Register freeipa linger
-  ansible.builtin.command: loginctl show-user "{{ freeipa_user_username }}" --property=Linger
-  register: linger_status
-  changed_when: linger_status.rc == 0 or linger_status.rc == 1
-  become: true
+# Can run as many times as you want
+# - name: Register freeipa linger
+#  ansible.builtin.command: loginctl show-user "{{ freeipa_user_username }}" --property=Linger
+#  register: linger_status
+#  changed_when: linger_status.rc == 0 or linger_status.rc == 1
+#  ignore_errors: true
+#  become: true
 
 - name: Enable loginctl linger
   ansible.builtin.command: loginctl enable-linger "{{ freeipa_user_username }}"
@@ -28,7 +30,6 @@
   changed_when: linger_success.rc == 0
   failed_when: linger_success.rc != 0
   become: true
-  when: linger_status.stdout == 'Linger=no' or linger_status.rc == 1
 
 # https://specifications.freedesktop.org/basedir-spec/latest/ar01s03.html
 # https://github.com/systemd/systemd/issues/7451#issuecomment-346787237
