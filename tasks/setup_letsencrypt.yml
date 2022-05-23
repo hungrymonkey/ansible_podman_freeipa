@@ -5,7 +5,7 @@
 
 - name: Check if certificate already exists.
   ansible.builtin.stat:
-    path: "{{ freeipa_haproxy_ssl_path }}/{{ freeipa_domain_name }}/cert.pem"
+    path: "{{ freeipa_letsencrypt_path }}/config/archive/{{ freeipa_domain_name }}/cert1.pem"
   register: letsencrypt_cert
 
 - name: Ensure Install Directory Exists
