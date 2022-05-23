@@ -5,13 +5,16 @@
   ansible.builtin.systemd:
     name: freeipa-rootless-podman.socket
     enabled: true
-    daemon_reload: true
   become: true
 
 - name: enable freeipa-server
   ansible.builtin.systemd:
     name: freeipa.service
     enabled: true
+  become: true
+
+- name: reload systemd
+  ansible.builtin.systemd:
     daemon_reload: true
   become: true
 
@@ -20,7 +23,6 @@
     name: dbus.service
     enabled: true
     scope: user
-    daemon_reload: true
   become: true
   become_flags: "su - {{ freeipa_user_username }} -c"
   become_user: "{{ freeipa_user_username }}"
@@ -31,7 +33,6 @@
     enabled: false
     state: stopped
     scope: user
-    daemon_reload: true
   become: true
   become_flags: "su - {{ freeipa_user_username }} -c"
   become_user: "{{ freeipa_user_username }}"

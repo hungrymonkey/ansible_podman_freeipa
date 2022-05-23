@@ -45,6 +45,7 @@
   notify:
     - enable freeipa-server
     - enable freeipa-dbus
+    - reload systemd
   become: true
   when: freeipa_enabled|bool
 
@@ -93,6 +94,7 @@
     daemon_reload: true
   notify:
     - disable freeipa-dbus
+    - reload systemd
   become_user: "{{ freeipa_user_username }}"
   become_flags: "su - {{ freeipa_user_username }} -c"
   become: true
