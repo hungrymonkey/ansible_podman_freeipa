@@ -56,8 +56,9 @@
         --agree-tos --email "{{ letsencrypt_certbot_admin_email }}"
         --preferred-challenges http
         --config-dir "{{ freeipa_letsencrypt_path }}/config"
-        --working-dir "{{ freeipa_letsencrypt_path }}/working"
+        --work-dir "{{ freeipa_letsencrypt_path }}/working"
         -d "{{ freeipa_domain_name }}"
+  become: true
   when:
     - not letsencrypt_cert.stat.exists
     - not letsencrypt_certbot_staging|bool
@@ -68,9 +69,10 @@
       --agree-tos --email "{{ letsencrypt_certbot_admin_email }}"
       --preferred-challenges http
       --config-dir "{{ freeipa_letsencrypt_path }}/config"
-      --working-dir "{{ freeipa_letsencrypt_path }}/working"
+      --work-dir "{{ freeipa_letsencrypt_path }}/working"
       -d "{{ freeipa_domain_name }}"
       --staging
+  become: true
   when:
     - not letsencrypt_cert.stat.exists
     - letsencrypt_certbot_staging|bool
