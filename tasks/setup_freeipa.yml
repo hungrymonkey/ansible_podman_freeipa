@@ -2,7 +2,7 @@
 
 - name: Pull Freeipa podman
   containers.podman.podman_image:
-    name: "{{ freepbx_podman_image }}"
+    name: "{{ freeipa_podman_image }}"
     pull: true
   become: true
   become_flags: "su - {{ freeipa_user_username }} -c"
