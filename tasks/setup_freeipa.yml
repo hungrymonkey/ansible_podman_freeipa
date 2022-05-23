@@ -91,7 +91,6 @@
   ansible.builtin.systemd:
     name: freeipa-rootless-podman.socket
     state: stopped
-    daemon_reload: true
   notify:
     - disable freeipa-dbus
     - reload systemd
