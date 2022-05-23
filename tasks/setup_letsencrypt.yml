@@ -3,11 +3,6 @@
 # https://computingforgeeks.com/secure-freeipa-server-with-lets-encrypt-ssl-certificate/
 # https://github.com/freeipa/freeipa-letsencrypt
 
-- name: Check if certificate already exists.
-  ansible.builtin.stat:
-    path: "{{ freeipa_letsencrypt_path }}/config/archive/{{ freeipa_domain_name }}/cert1.pem"
-  register: letsencrypt_cert
-
 - name: Ensure Install Directory Exists
   ansible.builtin.file:
     path: "{{ item }}"
@@ -21,6 +16,11 @@
     - "{{ freeipa_letsencrypt_path }}/cert"
   become: true
   when: freeipa_enabled|bool
+
+- name: Check if certificate already exists.
+  ansible.builtin.stat:
+    path: "{{ freeipa_letsencrypt_path }}/config/archive/{{ freeipa_domain_name }}/cert1.pem"
+  register: letsencrypt_cert
 
 - name: Download letsencrypt root certs
   ansible.builtin.get_url:
