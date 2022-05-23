@@ -98,6 +98,24 @@
   become: true
   when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
 
+- name: Disable freeipa pod
+  containers.podman.podman_pod:
+    name: "{{ freeipa_podman_pod_name }}"
+    state: stopped
+  become_user: "{{ freeipa_user_username }}"
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become: true
+  when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
+
+- name: Delete freeipa pod
+  containers.podman.podman_pod:
+    name: "{{ freeipa_podman_pod_name }}"
+    state: absent
+  become_user: "{{ freeipa_user_username }}"
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become: true
+  when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
+
 - name: Ensure freeipa doesn't exist
   ansible.builtin.file:
     path: "{{ item }}"
