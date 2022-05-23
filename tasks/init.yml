@@ -14,13 +14,28 @@
     state: present
   become: true
 
+# Enable linger to allow systemd session for non login user
+- name: Register freeipa linger
+  ansible.builtin.command: loginctl show-user "{{ freeipa_user_username }}" --property=Linger
+  register: linger_status
+  changed_when: linger_status.rc == 0
+  become: true
+
+- name: Enable loginctl linger
+  ansible.builtin.command: loginctl enable-linger "{{ freeipa_user_username }}"
+  register: linger_success
+  changed_when: linger_success.rc == 0
+  failed_when: linger_success.rc != 0
+  become: true
+  when: linger_status.stdout == 'Linger=no'
+
 # https://specifications.freedesktop.org/basedir-spec/latest/ar01s03.html
 # https://github.com/systemd/systemd/issues/7451#issuecomment-346787237
-- name: Ensure freeipa pid run exists
-  ansible.builtin.file:
-    path: "/run/user/{{ freeipa_user_uid }}"
-    state: directory
-    owner: "{{ freeipa_user_uid }}"
-    group: "{{ freeipa_user_gid }}"
-    mode: 0700
-  become: true
+# - name: Ensure freeipa pid run exists
+#  ansible.builtin.file:
+#    path: "/run/user/{{ freeipa_user_uid }}"
+#    state: directory
+#    owner: "{{ freeipa_user_uid }}"
+#    group: "{{ freeipa_user_gid }}"
+#    mode: 0700
+#  become: true
