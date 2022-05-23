@@ -3,6 +3,10 @@
 # https://computingforgeeks.com/secure-freeipa-server-with-lets-encrypt-ssl-certificate/
 # https://github.com/freeipa/freeipa-letsencrypt
 
+- name: Set Certbot script variable.
+  ansible.builtin.set_fact:
+    certbot_script: /usr/bin/certbot
+
 - name: Check if certificate already exists.
   ansible.builtin.stat:
     path: "{{ freeipa_letsencrypt_path }}/config/archive/{{ freeipa_domain_name }}/cert1.pem"

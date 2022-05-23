@@ -24,9 +24,6 @@
     - setup-all
     - setup-freeipa
 
-- name: Set Certbot script variable.
-  ansible.builtin.set_fact:
-    certbot_script: /usr/bin/certbot
 
 - name: Setup Letsencrypt
   import_tasks: "{{ role_path }}/tasks/setup_letsencrypt.yml"
