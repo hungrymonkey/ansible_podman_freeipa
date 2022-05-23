@@ -14,3 +14,42 @@
     enabled: true
     daemon_reload: true
   become: true
+
+- name: enable freeipa-dbus
+  ansible.builtin.systemd:
+    name: dbus.service
+    enabled: true
+    scope: user
+    daemon_reload: true
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
+
+- name: disable freeipa-dbus
+  ansible.builtin.systemd:
+    name: dbus.service
+    enabled: false
+    state: stopped
+    scope: user
+    daemon_reload: true
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
+
+- name: stop freeipa-dbus
+  ansible.builtin.systemd:
+    name: dbus.service
+    state: stopped
+    scope: user
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
+
+- name: start freeipa-dbus
+  ansible.builtin.systemd:
+    name: dbus.service
+    state: started
+    scope: user
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"

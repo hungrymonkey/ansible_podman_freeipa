@@ -44,6 +44,7 @@
     - freeipa.service
   notify:
     - enable freeipa-server
+    - enable freeipa-dbus
   become: true
   when: freeipa_enabled|bool
 
@@ -86,6 +87,18 @@
   when: "not freeipa_enabled|bool"
 
 - name: Ensure freeipa is stopped
+  ansible.builtin.systemd:
+    name: freeipa-rootless-podman.socket
+    state: stopped
+    daemon_reload: true
+  notify:
+    - disable freeipa-dbus
+  become_user: "{{ freeipa_user_username }}"
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become: true
+  when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
+
+- name: Ensure freeipa doesn't exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
@@ -102,13 +115,6 @@
   become_flags: "su - {{ freeipa_user_username }} -c"
   become_user: "{{ freeipa_user_username }}"
   when: "not freeipa_enabled|bool"
-
-- name: Ensure freeipa is stopped
-  ansible.builtin.systemd:
-    name: freeipa-rootless-podman.socket
-    state: stopped
-    daemon_reload: true
-  when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
 
 - name: Ensure freeipa.socket doesn't exist
   ansible.builtin.file:
