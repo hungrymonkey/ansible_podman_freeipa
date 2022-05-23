@@ -95,6 +95,7 @@
     - freeipa-letsencrypt.timer
   notify:
     - enable freeipa-letsencrypt
+  become: true
   when:
     - letsencrypt_certbot_enabled|bool
 
