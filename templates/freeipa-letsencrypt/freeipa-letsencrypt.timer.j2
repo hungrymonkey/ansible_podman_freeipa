@@ -1,0 +1,12 @@
+
+#jinja2: lstrip_blocks: "True"
+[Unit]
+Description=Renews Let's Encrypt SSL certificates periodically
+
+[Timer]
+Unit=freeipa-letsencrypt.timer
+OnCalendar=*-*-* 04:00:00
+RandomizedDelaySec=2h
+
+[Install]
+WantedBy=timers.target

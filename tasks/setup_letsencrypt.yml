@@ -1,9 +1,40 @@
 ---
 
+# https://computingforgeeks.com/secure-freeipa-server-with-lets-encrypt-ssl-certificate/
+# https://github.com/freeipa/freeipa-letsencrypt
+
 - name: Check if certificate already exists.
   ansible.builtin.stat:
     path: "{{ freeipa_haproxy_ssl_path }}/{{ freeipa_domain_name }}/cert.pem"
   register: letsencrypt_cert
+
+- name: Ensure Install Directory Exists
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ freeipa_user_uid }}"
+    group: "{{ freeipa_user_gid }}"
+    mode: 0700
+  with_items:
+    - "{{ freeipa_letsencrypt_path }}/config"
+    - "{{ freeipa_letsencrypt_path }}/working"
+    - "{{ freeipa_letsencrypt_path }}/cert"
+  become: true
+  when: freeipa_enabled|bool
+
+- name: Download letsencrypt root certs
+  ansible.builtin.get_url:
+    url: "https://letsencrypt.org/certs/{{ item }}"
+    dest: "{{ freeipa_letsencrypt_path }}/cert/{{ items }}"
+    mode: '0600'
+  with_items:
+    - "isrgrootx1.pem"
+    - "isrg-root-x2.pem"
+    - "lets-encrypt-r3.pem"
+    - "lets-encrypt-e1.pem"
+    - "lets-encrypt-r4.pem"
+    - "lets-encrypt-e2.pem"
+  when: not letsencrypt_cert.stat.exists
 
 - name: Stop services to allow certbot to generate a cert.
   ansible.builtin.service:
@@ -12,11 +43,14 @@
   when: not letsencrypt_cert.stat.exists
   with_items: "{{ letsencrypt_certbot_create_standalone_stop_services }}"
 
+
 - name: Generate new certificate if one doesn't exist.
   ansible.builtin.command: >
         "{{ certbot_script }}" certonly --standalone --noninteractive
         --agree-tos --email "{{ letsencrypt_certbot_admin_email }}"
         --preferred-challenges http
+        --config-dir "{{ freeipa_letsencrypt_path }}/config"
+        --working-dir "{{ freeipa_letsencrypt_path }}/working"
         -d "{{ freeipa_domain_name }}"
   when:
     - not letsencrypt_cert.stat.exists
@@ -27,6 +61,8 @@
       "{{ certbot_script }}" certonly --standalone --noninteractive
       --agree-tos --email "{{ letsencrypt_certbot_admin_email }}"
       --preferred-challenges http
+      --config-dir "{{ freeipa_letsencrypt_path }}/config"
+      --working-dir "{{ freeipa_letsencrypt_path }}/working"
       -d "{{ freeipa_domain_name }}"
       --staging
   when:

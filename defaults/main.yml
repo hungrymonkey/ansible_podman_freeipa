@@ -18,6 +18,8 @@ freeipa_data_path: "{{ freeipa_base_path }}/data"
 freeipa_systemd_path: "/etc/systemd/system"
 freeipa_container_extra_arguments: ""
 
+freeipa_letsencrypt_path: "{{ freeipa_install_directory }}/letsencrypt"
+
 freeipa_podman_dns_bind_port: 53
 freeipa_podman_http_bind_port: 80
 freeipa_podman_kerberos_bind_port: 88
@@ -32,5 +34,6 @@ freeipa_domain_name: "example.com"
 
 letsencrypt_certbot_enabled: false
 letsencrypt_certbot_admin_email: "example@example.com"
+letsencrypt_certbot_staging: true
 
 freeipa_haproxy_username: "haproxy"
