@@ -35,6 +35,7 @@
     - "lets-encrypt-e1.pem"
     - "lets-encrypt-r4.pem"
     - "lets-encrypt-e2.pem"
+  become: true
   when: not letsencrypt_cert.stat.exists
 
 - name: Stop services to allow certbot to generate a cert.
