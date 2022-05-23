@@ -13,3 +13,14 @@
     create_home: true
     state: present
   become: true
+
+# https://specifications.freedesktop.org/basedir-spec/latest/ar01s03.html
+# https://github.com/systemd/systemd/issues/7451#issuecomment-346787237
+- name: Ensure Install Directory Exists
+  ansible.builtin.file:
+    path: "/run/user/{{ freeipa_user_uid }}"
+    state: directory
+    owner: "{{ freeipa_user_uid }}"
+    group: "{{ freeipa_user_gid }}"
+    mode: 0700
+  become: true
