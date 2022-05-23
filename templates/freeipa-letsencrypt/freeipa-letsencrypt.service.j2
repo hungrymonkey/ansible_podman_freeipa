@@ -1,0 +1,14 @@
+#jinja2: lstrip_blocks: "True"
+[Unit]
+Description=Renews Let's Encrypt SSL certificates
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/sudo /usr/sbin/service freeipa-haproxy stop
+ExecStart={{ certbot_script }} renew --non-interactive --no-self-upgrade \
+{% if letsencrypt_certbot_staging %}
+	--staging \
+{% endif %}
+	--standalone --email={{ letsencrypt_certbot_admin_email }}
+ExecStartPost=/usr/bin/sudo /usr/sbin/service freeipa-haproxy start
+User=root
