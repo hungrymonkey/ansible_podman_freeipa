@@ -10,5 +10,6 @@
     name: "{{ freeipa_user_username }}"
     uid: "{{ freeipa_user_uid }}"
     group: "{{ freeipa_user_gid }}"
+    create_home: true
     state: present
   become: true
