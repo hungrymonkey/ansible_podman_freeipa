@@ -26,7 +26,7 @@
 - name: Download letsencrypt root certs
   ansible.builtin.get_url:
     url: "https://letsencrypt.org/certs/{{ item }}"
-    dest: "{{ freeipa_letsencrypt_path }}/cert/{{ items }}"
+    dest: "{{ freeipa_letsencrypt_path }}/cert/{{ item }}"
     mode: '0600'
   with_items:
     - "isrgrootx1.pem"
