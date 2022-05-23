@@ -1,2 +1,56 @@
 ---
 # handlers file for ansible_podman_freeipa
+
+- name: enable podman-rootless-socket
+  ansible.builtin.systemd:
+    name: freeipa-rootless-podman.socket
+    enabled: true
+  become: true
+
+- name: enable freeipa-server
+  ansible.builtin.systemd:
+    name: freeipa.service
+    enabled: true
+  become: true
+
+- name: reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: enable freeipa-dbus
+  ansible.builtin.systemd:
+    name: dbus.service
+    enabled: true
+    scope: user
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
+
+- name: disable freeipa-dbus
+  ansible.builtin.systemd:
+    name: dbus.service
+    enabled: false
+    state: stopped
+    scope: user
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
+
+- name: stop freeipa-dbus
+  ansible.builtin.systemd:
+    name: dbus.service
+    state: stopped
+    scope: user
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
+
+- name: start freeipa-dbus
+  ansible.builtin.systemd:
+    name: dbus.service
+    state: started
+    scope: user
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"

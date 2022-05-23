@@ -1,2 +1,29 @@
 ---
 # tasks file for ansible_podman_freeipa
+
+- name: init vars
+  import_tasks: "{{ role_path }}/tasks/init.yml"
+  tags:
+    - always
+
+- name: Install Dependencies
+  import_tasks: "{{ role_path }}/tasks/install_dependencies.yml"
+  tags:
+    - setup-all
+
+- name: Setup Rootless Podman
+  import_tasks: "{{ role_path }}/tasks/setup_rootless_podman.yml"
+  tags:
+    - setup-all
+    - setup-freeipa
+
+
+- name: Setup Rootless Podman
+  import_tasks: "{{ role_path }}/tasks/setup_freeipa.yml"
+  tags:
+    - setup-all
+    - setup-freeipa
+
+- name: Set Certbot script variable.
+  ansible.builtin.set_fact:
+    certbot_script: /usr/bin/certbot

@@ -1,2 +1,36 @@
 ---
 # defaults file for ansible_podman_freeipa
+
+freeipa_user_username: freeipa
+# [WARNING]: The value 997 (type int) in a string field was converted to '997' (type string). If this does not look like what you expect, quote the entire value to ensure it does not
+# change.
+# https://www.redhat.com/sysadmin/rootless-podman
+freeipa_user_uid: "1050"
+freeipa_user_gid: "1050"
+
+freeipa_enabled: true
+freeipa_podman_image: "quay.io/freeipa/freeipa-server:fedora-36-4.9.9"
+freeipa_podman_pod_name: "freeipa"
+freeipa_install_directory: "/freeipa"
+freeipa_base_path: "{{ freeipa_install_directory }}/server"
+freeipa_config_path: "{{ freeipa_base_path }}/config"
+freeipa_data_path: "{{ freeipa_base_path }}/data"
+freeipa_systemd_path: "/etc/systemd/system"
+freeipa_container_extra_arguments: ""
+
+freeipa_podman_dns_bind_port: 53
+freeipa_podman_http_bind_port: 80
+freeipa_podman_kerberos_bind_port: 88
+freeipa_podman_ntp_bind_port: 123
+freeipa_podman_ldap_bind_port: 386
+freeipa_podman_https_bind_port: 443
+freeipa_podman_kpassword_bind_port: 464
+freeipa_podman_ldaps_bind_port: 636
+
+
+freeipa_domain_name: "example.com"
+
+letsencrypt_certbot_enabled: false
+letsencrypt_certbot_admin_email: "example@example.com"
+
+freeipa_haproxy_username: "haproxy"

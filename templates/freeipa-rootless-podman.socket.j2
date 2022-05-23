@@ -1,0 +1,11 @@
+#jinja2: lstrip_blocks: "True"
+[Unit]
+Description=Podman API Socket
+Documentation=man:podman-api(1)
+
+[Socket]
+ListenStream=/run/user/{{ freeipa_user_uid }}/podman/podman.sock
+SocketMode=0660
+
+[Install]
+WantedBy=sockets.target

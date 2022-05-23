@@ -1,0 +1,150 @@
+---
+
+- name: Pull Freeipa podman
+  containers.podman.podman_image:
+    name: "{{ freeipa_podman_image }}"
+    pull: true
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
+  when: freeipa_enabled|bool
+
+- name: Ensure Install Directory Exists
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ freeipa_user_uid }}"
+    group: "{{ freeipa_user_gid }}"
+    mode: 0750
+  with_items:
+    - "{{ freeipa_data_path }}"
+    - "{{ freeipa_config_path }}"
+  become: true
+  when: freeipa_enabled|bool
+
+- name: Ensure freeipa-rootless-podman.socket installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ freeipa_systemd_path }}/{{ item }}"
+    mode: 0640
+  with_items:
+    - "freeipa-rootless-podman.service"
+    - "freeipa-rootless-podman.socket"
+  notify:
+    - enable podman-rootless-socket
+  become: true
+  when: freeipa_enabled|bool
+
+- name: Ensure freeipa systemd files are installed installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/freeipa-server/{{ item }}.j2"
+    dest: "{{ freeipa_systemd_path }}/{{ item }}"
+    mode: 0640
+  with_items:
+    - freeipa.service
+  notify:
+    - enable freeipa-server
+    - enable freeipa-dbus
+    - reload systemd
+  become: true
+  when: freeipa_enabled|bool
+
+# - name: Create freeipa network
+#  shell: podman network create "{{ freeipa_podman_network }}"
+#  become: yes
+#  ignore_errors: yes
+#  tags:
+#    - always
+
+##
+# https://github.com/containers/ansible-podman-collections/blob/master/plugins/modules/podman_pod.py
+# https://github.com/ansible/ansible/issues/72264
+##
+- name: Create freeipa pod
+  containers.podman.podman_pod:
+    name: "{{ freeipa_podman_pod_name }}"
+    publish:
+      - "{{ freeipa_podman_dns_bind_port }}:{{ freeipa_podman_dns_bind_port }}"
+      - "8000:{{ freeipa_podman_http_bind_port }}"
+      - "{{ freeipa_podman_kerberos_bind_port }}:{{ freeipa_podman_kerberos_bind_port }}"
+      - "{{ freeipa_podman_ntp_bind_port }}:{{ freeipa_podman_ntp_bind_port }}"
+      - "{{ freeipa_podman_ldap_bind_port }}:{{ freeipa_podman_ldap_bind_port }}"
+      - "8443:{{ freeipa_podman_https_bind_port }}"
+      - "{{ freeipa_podman_kpassword_bind_port }}:{{ freeipa_podman_kpassword_bind_port }}"
+      - "{{ freeipa_podman_ldaps_bind_port }}:{{ freeipa_podman_ldaps_bind_port }}/udp"
+  become_user: "{{ freeipa_user_username }}"
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become: true
+  when: freeipa_enabled|bool
+
+##
+# Removal Tasks
+##
+
+- name: Check existence of freeipa service
+  ansible.builtin.stat:
+    path: "{{ freeipa_systemd_path }}/freeipa-rootless-podman.socket"
+  register: freeipa_service_stat
+  when: "not freeipa_enabled|bool"
+
+- name: Ensure freeipa is stopped
+  ansible.builtin.systemd:
+    name: freeipa-rootless-podman.socket
+    state: stopped
+  notify:
+    - disable freeipa-dbus
+    - reload systemd
+  become_user: "{{ freeipa_user_username }}"
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become: true
+  when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
+
+- name: Disable freeipa pod
+  containers.podman.podman_pod:
+    name: "{{ freeipa_podman_pod_name }}"
+    state: stopped
+  become_user: "{{ freeipa_user_username }}"
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become: true
+  when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
+
+- name: Delete freeipa pod
+  containers.podman.podman_pod:
+    name: "{{ freeipa_podman_pod_name }}"
+    state: absent
+  become_user: "{{ freeipa_user_username }}"
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become: true
+  when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
+
+- name: Ensure freeipa doesn't exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ freeipa_data_path }}"
+    - "{{ freeipa_config_path }}"
+  when: "not freeipa_enabled|bool and freeipa_service_stat.stat.exists"
+
+- name: Destroy freeipa Image
+  containers.podman.podman_image:
+    name: "{{ freeipa_podman_image }}"
+    state: absent
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
+  when: "not freeipa_enabled|bool"
+
+- name: Ensure freeipa.socket doesn't exist
+  ansible.builtin.file:
+    path: "{{ freeipa_systemd_path }}/{{ item }}"
+    state: absent
+  with_items:
+    - "freeipa-rootless-podman.service"
+    - "freeipa-rootless-podman.socket"
+  notify:
+    - reload systemd
+  become: true
+  when:
+    - not freeipa_enabled|bool
+    - freeipa_service_stat.stat.exists
