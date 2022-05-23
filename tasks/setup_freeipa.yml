@@ -46,6 +46,6 @@
       - "8443:{{ freeipa_podman_https_bind_port }}"
       - "{{ freeipa_podman_kpassword_bind_port }}:{{ freeipa_podman_kpassword_bind_port }}"
       - "{{ freeipa_podman_ldaps_bind_port }}:{{ freeipa_podman_ldaps_bind_port }}/udp"
-    world_readable_temp: true
   become_user: "{{ freeipa_user_username }}"
+  become_flags: "su - {{ freeipa_user_username }} -c"
   become: true
