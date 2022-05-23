@@ -35,5 +35,6 @@ freeipa_domain_name: "example.com"
 letsencrypt_certbot_enabled: false
 letsencrypt_certbot_admin_email: "example@example.com"
 letsencrypt_certbot_staging: true
+letsencrypt_certbot_create_standalone_stop_services: []
 
 freeipa_haproxy_username: "haproxy"
