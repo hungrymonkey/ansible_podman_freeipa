@@ -49,6 +49,20 @@
   become: true
   when: freeipa_enabled|bool
 
+- name: Ensure freeipa config files installed installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/freeipa-server/{{ item }}.j2"
+    dest: "{{ freeipa_config_path }}/{{ item }}"
+    owner: "{{ freeipa_user_uid }}"
+    group: "{{ freeipa_user_gid }}"
+    mode: 0640
+  with_items:
+    - env-freeipa
+    - ipa-httpd.cnf
+  become: true
+  when:
+    - freeipa_enabled|bool
+
 # - name: Create freeipa network
 #  shell: podman network create "{{ freeipa_podman_network }}"
 #  become: yes
