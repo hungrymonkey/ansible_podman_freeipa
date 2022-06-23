@@ -84,6 +84,17 @@
   when: not letsencrypt_cert.stat.exists
   with_items: "{{ letsencrypt_certbot_create_standalone_stop_services }}"
 
+- name: Ensure freeipa systemd files are installed installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/freeipa-letsencrypt/{{ item }}.j2"
+    dest: "/usr/local/bin"
+    mode: 0750
+  with_items:
+    - renew-letsencrypt.sh
+  become: true
+  when:
+    - letsencrypt_certbot_enabled|bool
+
 
 - name: Ensure freeipa systemd files are installed installed
   ansible.builtin.template:
