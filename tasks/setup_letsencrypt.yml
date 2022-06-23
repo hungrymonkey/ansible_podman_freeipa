@@ -84,6 +84,17 @@
   when: not letsencrypt_cert.stat.exists
   with_items: "{{ letsencrypt_certbot_create_standalone_stop_services }}"
 
+- name: Ensure freeipa systemd files are installed installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/freeipa-letsencrypt/{{ item }}.j2"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: 0750
+  with_items:
+    - renew-letsencrypt.sh
+  become: true
+  when:
+    - letsencrypt_certbot_enabled|bool
+
 
 - name: Ensure freeipa systemd files are installed installed
   ansible.builtin.template:
@@ -108,7 +119,7 @@
   ansible.builtin.stat:
     path: "{{ freeipa_systemd_path }}/freeipa-letsencrypt.timer"
   register: freeipa_letsencrypt
-  when: "not letsencrypt_certbot_enabled|bool or not freeipa_haproxy_enabled|bool"
+  when: "not letsencrypt_certbot_enabled|bool"
 
 - name: Delete freeipa-letsencrypt.timer
   block:
@@ -126,6 +137,13 @@
       with_items:
         - freeipa-letsencrypt.service
         - freeipa-letsencrypt.timer
+
+    - name: Ensure freeipa-letsencrypt.sh doesn't exist
+      ansible.builtin.file:
+        path: "/usr/local/bin/{{ item }}"
+        state: absent
+      with_items:
+        - renew-letsencrypt.sh
   when:
-    - (not letsencrypt_certbot_enabled|bool) or (not freeipa_haproxy_enabled|bool)
+    - (not letsencrypt_certbot_enabled|bool)
     - freeipa_letsencrypt.stat.exists|bool
