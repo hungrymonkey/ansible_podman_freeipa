@@ -108,7 +108,7 @@
   ansible.builtin.stat:
     path: "{{ freeipa_systemd_path }}/freeipa-letsencrypt.timer"
   register: freeipa_letsencrypt
-  when: "not letsencrypt_certbot_enabled|bool or not freeipa_haproxy_enabled|bool"
+  when: "not letsencrypt_certbot_enabled|bool"
 
 - name: Delete freeipa-letsencrypt.timer
   block:
@@ -127,5 +127,5 @@
         - freeipa-letsencrypt.service
         - freeipa-letsencrypt.timer
   when:
-    - (not letsencrypt_certbot_enabled|bool) or (not freeipa_haproxy_enabled|bool)
+    - (not letsencrypt_certbot_enabled|bool)
     - freeipa_letsencrypt.stat.exists|bool
