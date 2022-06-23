@@ -54,3 +54,12 @@
   become: true
   become_flags: "su - {{ freeipa_user_username }} -c"
   become_user: "{{ freeipa_user_username }}"
+
+- name: enable freeipa-letsencrypt
+  ansible.builtin.systemd:
+    name: freeipa-letsencrypt.timer
+    state: started
+    scope: user
+  become: true
+  become_flags: "su - {{ freeipa_user_username }} -c"
+  become_user: "{{ freeipa_user_username }}"
