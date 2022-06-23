@@ -137,6 +137,13 @@
       with_items:
         - freeipa-letsencrypt.service
         - freeipa-letsencrypt.timer
+
+    - name: Ensure freeipa-letsencrypt.sh doesn't exist
+      ansible.builtin.file:
+        path: "/usr/local/bin/{{ item }}"
+        state: absent
+      with_items:
+        - renew-letsencrypt.sh
   when:
     - (not letsencrypt_certbot_enabled|bool)
     - freeipa_letsencrypt.stat.exists|bool
